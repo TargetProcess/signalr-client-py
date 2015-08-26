@@ -12,19 +12,20 @@ _available_transports = {
 
 
 class Connection:
-    def __init__(self, url, cookies):
+    def __init__(self, url, cookies, connection_data):
         self.__cookies = cookies
         self.__url = url
         self.__transport = None
         self.__hubs = {}
         self.hub_send_counter = 0
+        self.__connection_data = connection_data
 
     def __get_transport(self, negotiate_data):
         try_web_sockets = bool(negotiate_data['TryWebSockets'])
         ctor = _available_transports['webSockets'] if try_web_sockets else _available_transports['serverSentEvents']
         connection_token = negotiate_data['ConnectionToken']
 
-        return ctor(self.__url, self.__cookies, connection_token)
+        return ctor(self.__url, self.__cookies, connection_token, self.__connection_data)
 
     def start(self):
         negotiate = requests.get('{0}/negotiate?clientProtocol=1.5'.format(self.__url), cookies=self.__cookies)
