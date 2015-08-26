@@ -10,8 +10,6 @@ _available_transports = {
     'serverSentEvents': transports.ServerSentEventsTransport
 }
 
-_hub_send_counter = -1
-
 
 class Connection:
     def __init__(self, url, cookies):
@@ -19,6 +17,7 @@ class Connection:
         self.__url = url
         self.__transport = None
         self.__hubs = {}
+        self.hub_send_counter = 0
 
     def __get_transport(self, negotiate_data):
         try_web_sockets = bool(negotiate_data['TryWebSockets'])
@@ -28,12 +27,11 @@ class Connection:
         return ctor(self.__url, self.__cookies, connection_token)
 
     def start(self):
-        negotiate = requests.get('{0}/negotiate'.format(self.__url), cookies=self.__cookies)
+        negotiate = requests.get('{0}/negotiate?clientProtocol=1.5'.format(self.__url), cookies=self.__cookies)
         negotiate_data = json.loads(negotiate.content)
         transport = self.__get_transport(negotiate_data)
         listener = transport.start()
         gevent.spawn(listener)
-
         self.__transport = transport
 
     def subscribe(self, handler):
@@ -67,8 +65,9 @@ class HubServer:
             'H': self.name,
             'M': method,
             'A': [data],
-            'I': ++_hub_send_counter
+            'I': ++self.__connection.hub_send_counter
         })
+        self.__connection.hub_send_counter += 1
 
     def __getattr__(self, method):
         def _missing(data):
@@ -83,7 +82,11 @@ class HubClient(object):
         self.__connection = connection
 
         def handle(data):
-            if 'M' in data and 'H' in data['M'] and data['M']['H'] == self.name:
-                getattr(self, data['M']['M'])(data['M']['A'])
+            inner_data = data['M'][0] if 'M' in data and len(data['M']) > 0 else {}
+            hub = inner_data['H'] if 'H' in inner_data else ''
+            if hub == self.name:
+                method = inner_data['M']
+                arguments = inner_data['A']
+                getattr(self, method)(arguments)
 
         self.__connection.subscribe(handle)

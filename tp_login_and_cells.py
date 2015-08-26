@@ -40,7 +40,6 @@ class UserBehavior(TaskSet):
         connection.start()
 
         def notify_changed(data):
-            print(data)
             request_success.fire(
                 request_type='WS',
                 name='/notifications/connect',
