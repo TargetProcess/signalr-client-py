@@ -1,15 +1,11 @@
 import json
-import urllib
 
 import gevent
 import requests
 
-import transports
+from signalr.transports import get_url
 
-_available_transports = {
-    'webSockets': transports.WebSocketsTransport,
-    'serverSentEvents': transports.ServerSentEventsTransport
-}
+import transports
 
 
 class Connection:
@@ -19,20 +15,19 @@ class Connection:
         self.__transport = None
         self.__hubs = {}
         self.hub_send_counter = 0
-        self.__connection_data = urllib.quote_plus(json.dumps(connection_data))
+        self.__connection_data = json.dumps(connection_data)
 
     def __get_transport(self, negotiate_data):
         try_web_sockets = bool(negotiate_data['TryWebSockets'])
-        ctor = _available_transports['webSockets'] if try_web_sockets else _available_transports['serverSentEvents']
+        ctor = transports.available_transports['webSockets'] if try_web_sockets else transports.available_transports[
+            'serverSentEvents']
         connection_token = negotiate_data['ConnectionToken']
 
         return ctor(self.__url, self.__cookies, connection_token, self.__connection_data)
 
     def start(self):
-        negotiate = requests.get(
-            '{url}/negotiate?clientProtocol=1.5&connectionData={connection_data}'.format(url=self.__url,
-                                                                                         connection_data=self.__connection_data),
-            cookies=self.__cookies)
+        url = get_url(self.__url, 'negotiate')
+        negotiate = requests.get(url, cookies=self.__cookies)
         negotiate_data = json.loads(negotiate.content)
         transport = self.__get_transport(negotiate_data)
         listener = transport.start()

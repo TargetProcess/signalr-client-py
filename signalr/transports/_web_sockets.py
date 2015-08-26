@@ -1,5 +1,4 @@
 import json
-import urllib
 import urlparse
 
 from websocket import create_connection
@@ -8,21 +7,25 @@ from signalr.transports import Transport
 
 
 class WebSocketsTransport(Transport):
+    name = 'webSockets'
+
     def __init__(self, url, cookies, connection_token, connection_data):
-        Transport.__init__(self, url, cookies, connection_token, connection_data)
+        Transport.__init__(self, self.__get_transport_specific_url(url), cookies, connection_token, connection_data)
         self.ws = None
 
+    def _get_transport_name(self):
+        return WebSocketsTransport.name
+
+    @staticmethod
+    def __get_transport_specific_url(url):
         parsed = urlparse.urlparse(url)
-        self._url = '{scheme}://{url.hostname}{url.path}/connect?transport=webSockets&connectionToken={connection_token}&connectionData={connection_data}&clientProtocol=1.5'.format(
-            scheme=('ws' if parsed.scheme == 'http' else 'wss'),
-            url=parsed,
-            connection_token=urllib.quote_plus(self._connection_token),
-            connection_data=self._connection_data)
+        scheme = 'wss' if parsed.scheme == 'https' else 'ws'
+        url_data = (scheme, parsed.netloc, parsed.path, parsed.params, parsed.query, parsed.fragment)
+
+        return urlparse.urlunparse(url_data)
 
     def start(self):
-        self.ws = create_connection(self._url,
-                                    None,
-                                    header=self.__get_headers())
+        self.ws = create_connection(self._get_url('connect'), header=self.__get_headers())
 
         def _receive():
             while True:
