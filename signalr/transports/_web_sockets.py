@@ -22,8 +22,7 @@ class WebSocketsTransport(Transport):
     def start(self):
         self.ws = create_connection(self._url,
                                     None,
-                                    cookie=self._get_auth_cookie(),
-                                    header=[self._user_agent_header])
+                                    header=self.__get_headers())
 
         def _receive():
             while True:
@@ -31,6 +30,9 @@ class WebSocketsTransport(Transport):
                 self._handle_notification(notification)
 
         return _receive
+
+    def __get_headers(self):
+        return map(lambda name: '{name}: {value}'.format(name=name, value=self._headers[name]), self._headers)
 
     def send(self, data):
         self.ws.send(json.dumps(data))
