@@ -14,7 +14,7 @@ class WebSocketsTransport(Transport):
 
         parsed = urlparse.urlparse(url)
         self._url = '{scheme}://{url.hostname}{url.path}/connect?transport=webSockets&connectionToken={connection_token}&connectionData={connection_data}&clientProtocol=1.5'.format(
-            scheme=('ws' if parsed.scheme == 'http' else 'ws'),
+            scheme=('ws' if parsed.scheme == 'http' else 'wss'),
             url=parsed,
             connection_token=urllib.quote_plus(self._connection_token),
             connection_data=urllib.quote_plus(json.dumps(connection_data)))
