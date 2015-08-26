@@ -9,8 +9,7 @@ from signalr.transports import Transport
 
 class ServerSentEventsTransport(Transport):
     def __init__(self, url, cookies, connection_token, connection_data):
-        Transport.__init__(self, url, cookies, connection_token)
-        self.__connection_data = connection_data
+        Transport.__init__(self, url, cookies, connection_token, connection_data)
 
     def send(self, data):
         requests.post(self.__get_send_url(), headers=self._headers,
@@ -39,4 +38,4 @@ class ServerSentEventsTransport(Transport):
     def __get_url(self, action):
         return '{url}/{action}?transport=serverSentEvents&clientProtocol=1.5&connectionToken={connection_token}&connectionData={connection_data}'.format(
             url=self._url, action=action, connection_token=urllib.quote_plus(self._connection_token),
-            connection_data=urllib.quote_plus(json.dumps(self.__connection_data)))
+            connection_data=self._connection_data)

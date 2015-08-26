@@ -9,7 +9,7 @@ from signalr.transports import Transport
 
 class WebSocketsTransport(Transport):
     def __init__(self, url, cookies, connection_token, connection_data):
-        Transport.__init__(self, url, cookies, connection_token)
+        Transport.__init__(self, url, cookies, connection_token, connection_data)
         self.ws = None
 
         parsed = urlparse.urlparse(url)
@@ -17,7 +17,7 @@ class WebSocketsTransport(Transport):
             scheme=('ws' if parsed.scheme == 'http' else 'wss'),
             url=parsed,
             connection_token=urllib.quote_plus(self._connection_token),
-            connection_data=urllib.quote_plus(json.dumps(connection_data)))
+            connection_data=self._connection_data)
 
     def start(self):
         self.ws = create_connection(self._url,

@@ -1,4 +1,5 @@
 import json
+import urllib
 
 import gevent
 import requests
@@ -18,7 +19,7 @@ class Connection:
         self.__transport = None
         self.__hubs = {}
         self.hub_send_counter = 0
-        self.__connection_data = connection_data
+        self.__connection_data = urllib.quote_plus(json.dumps(connection_data))
 
     def __get_transport(self, negotiate_data):
         try_web_sockets = bool(negotiate_data['TryWebSockets'])
@@ -28,7 +29,10 @@ class Connection:
         return ctor(self.__url, self.__cookies, connection_token, self.__connection_data)
 
     def start(self):
-        negotiate = requests.get('{0}/negotiate?clientProtocol=1.5'.format(self.__url), cookies=self.__cookies)
+        negotiate = requests.get(
+            '{url}/negotiate?clientProtocol=1.5&connectionData={connection_data}'.format(url=self.__url,
+                                                                                         connection_data=self.__connection_data),
+            cookies=self.__cookies)
         negotiate_data = json.loads(negotiate.content)
         transport = self.__get_transport(negotiate_data)
         listener = transport.start()
