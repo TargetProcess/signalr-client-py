@@ -3,9 +3,7 @@ import json
 import gevent
 import requests
 
-from signalr.transports import get_url
-
-import transports
+from signalr.transports import get_url, get_transport
 
 
 class Connection:
@@ -18,12 +16,7 @@ class Connection:
         self.__connection_data = json.dumps(connection_data)
 
     def __get_transport(self, negotiate_data):
-        try_web_sockets = bool(negotiate_data['TryWebSockets'])
-        ctor = transports.available_transports['webSockets'] if try_web_sockets else transports.available_transports[
-            'serverSentEvents']
-        connection_token = negotiate_data['ConnectionToken']
-
-        return ctor(self.__url, self.__cookies, connection_token, self.__connection_data)
+        return get_transport(negotiate_data, self.__url, self.__cookies, self.__connection_data)
 
     def start(self):
         url = get_url(self.__url, 'negotiate')

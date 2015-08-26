@@ -3,7 +3,11 @@ import urlparse
 
 from websocket import create_connection
 
-from signalr.transports import Transport
+from ._transport import Transport
+
+
+def accept_ws(negotiate_data):
+    return bool(negotiate_data['TryWebSockets'])
 
 
 class WebSocketsTransport(Transport):

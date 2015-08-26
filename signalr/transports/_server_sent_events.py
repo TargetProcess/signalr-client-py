@@ -3,7 +3,11 @@ import json
 import requests
 import sseclient
 
-from signalr.transports import Transport
+from ._transport import Transport
+
+
+def accept_sse(negotiate_data):
+    return True
 
 
 class ServerSentEventsTransport(Transport):
