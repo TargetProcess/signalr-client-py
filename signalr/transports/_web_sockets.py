@@ -13,8 +13,8 @@ def accept_ws(negotiate_data):
 class WebSocketsTransport(Transport):
     name = 'webSockets'
 
-    def __init__(self, url, cookies, connection_token, connection_data):
-        Transport.__init__(self, self.__get_transport_specific_url(url), cookies, connection_token, connection_data)
+    def __init__(self, url, cookies, connection_token):
+        Transport.__init__(self, self.__get_transport_specific_url(url), cookies, connection_token)
         self.ws = None
 
     def _get_transport_name(self):
@@ -28,8 +28,8 @@ class WebSocketsTransport(Transport):
 
         return urlparse.urlunparse(url_data)
 
-    def start(self):
-        self.ws = create_connection(self._get_url('connect'), header=self.__get_headers())
+    def start(self, connection_data):
+        self.ws = create_connection(self._get_url('connect', connectionData=connection_data), header=self.__get_headers())
 
         def _receive():
             while True:
@@ -41,5 +41,5 @@ class WebSocketsTransport(Transport):
     def __get_headers(self):
         return map(lambda name: '{name}: {value}'.format(name=name, value=self._headers[name]), self._headers)
 
-    def send(self, data):
+    def send(self, data, connection_data):
         self.ws.send(json.dumps(data))

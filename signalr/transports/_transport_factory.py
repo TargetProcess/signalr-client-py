@@ -7,10 +7,9 @@ _available_transports = {
 }
 
 
-def get_transport(negotiate_data, url, cookie, connection_data):
+def get_transport(negotiate_data, url, cookie):
     for transport in _available_transports:
         (accept, transport_ctor) = _available_transports[transport]
         if accept is None or accept(negotiate_data):
-            connection_token = negotiate_data['ConnectionToken']
-            return transport_ctor(url, cookie, connection_token, connection_data)
+            return transport_ctor(url, cookie, negotiate_data['ConnectionToken'])
     raise Exception('Cannot find suitable transport')

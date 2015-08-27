@@ -36,10 +36,7 @@ class UserBehavior(TaskSet):
         self.cookies = response.cookies
 
     def subscribe_to_slice_notifications(self):
-        connection_data = [{"name": "entitytreeviewslice"}, {"name": "resource"}, {"name": "slice"},
-                           {"name": "timelineslice"}, {"name": "treeviewslice"}, {"name": "viewmenu"}]
-        connection = signalr.Connection('{0}/notifications'.format(self.parent.host), self.cookies, connection_data)
-        connection.start()
+        connection = signalr.Connection('{0}/notifications'.format(self.parent.host), self.cookies)
 
         def notify_changed(data):
             request_success.fire(
@@ -57,6 +54,8 @@ class UserBehavior(TaskSet):
             "id": "bf3a2067-4ade-e84e-3a1c-dff12f8a66e8",
             "logNotifications": None
         })
+
+        connection.start()
 
     def get_acid(self):
         response = self.client.get("/restui/board.aspx",
