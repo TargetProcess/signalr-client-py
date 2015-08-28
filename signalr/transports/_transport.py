@@ -1,14 +1,15 @@
 from abc import abstractmethod
 import json
+import urllib
+import requests
 
 from ._events import EventHook
-from ._url import get_url
 
 
 class Transport:
-    def __init__(self, url, cookies, connection_token):
-        self._connection_token = connection_token
-        self._url = url
+    def __init__(self, cookies):
+        self._cookies = cookies
+        self._connection_token = None
         self.handlers = EventHook()
         self._headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0',
@@ -24,12 +25,18 @@ class Transport:
         return '; '.join(
             map(lambda (name, value): '{name}={value}'.format(name=name, value=value), cookies.iteritems()))
 
+    def negotiate(self, connection):
+        url = self.__get_base_url(connection.url, connection, 'negotiate', connectionData=connection.connection_data)
+        negotiate = requests.get(url, headers=self._headers)
+
+        return json.loads(negotiate.content)
+
     @abstractmethod
-    def start(self, connection_data):
+    def start(self, connection):
         pass
 
     @abstractmethod
-    def send(self, data, connection_data):
+    def send(self, connection, data):
         pass
 
     def _handle_notification(self, message):
@@ -40,12 +47,24 @@ class Transport:
         data = json.loads(message)
         self.handlers.fire(data=data)
 
-    def _get_url(self, action, **kwargs):
+    def _get_url(self, connection, action, **kwargs):
         args = kwargs.copy()
         args['transport'] = self._get_transport_name()
-        args['connectionToken'] = self._connection_token
+        args['connectionToken'] = connection.connection_token
+        args['connectionData'] = connection.connection_data
 
-        return get_url(self._url, action, **args)
+        url = self._get_transport_specific_url(connection.url)
+        return self.__get_base_url(url, connection, action, **args)
 
-    def __get_url(self, action):
-        return self._get_url(action, self._get_transport_name())
+    def _get_transport_specific_url(self, url):
+        return url
+
+    @staticmethod
+    def __get_base_url(url, connection, action, **kwargs):
+        args = kwargs.copy()
+        args['clientProtocol'] = connection.protocol_version
+        query = '&'.join(map(lambda key: '{key}={value}'.format(key=key, value=urllib.quote_plus(args[key])), args))
+
+        return '{url}/{action}?{query}'.format(url=url,
+                                               action=action,
+                                               query=query)
