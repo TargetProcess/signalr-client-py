@@ -1,33 +1,22 @@
 from abc import abstractmethod
 import json
 import urllib
-import requests
 
 from ._events import EventHook
 
 
 class Transport:
-    def __init__(self, cookies):
-        self._cookies = cookies
-        self._connection_token = None
+    def __init__(self, session):
+        self._session = session
         self.handlers = EventHook()
-        self._headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0',
-            'Cookie': self.__get_cookie_str(cookies)
-        }
 
     @abstractmethod
-    def _get_transport_name(self):
+    def _get_name(self):
         pass
-
-    @staticmethod
-    def __get_cookie_str(cookies):
-        return '; '.join(
-            map(lambda (name, value): '{name}={value}'.format(name=name, value=value), cookies.iteritems()))
 
     def negotiate(self, connection):
         url = self.__get_base_url(connection.url, connection, 'negotiate', connectionData=connection.connection_data)
-        negotiate = requests.get(url, headers=self._headers)
+        negotiate = self._session.get(url)
 
         return json.loads(negotiate.content)
 
@@ -39,6 +28,9 @@ class Transport:
     def send(self, connection, data):
         pass
 
+    def accept(self, negotiate_data):
+        return True
+
     def _handle_notification(self, message):
         print message
         if len(message) == 0:
@@ -49,7 +41,7 @@ class Transport:
 
     def _get_url(self, connection, action, **kwargs):
         args = kwargs.copy()
-        args['transport'] = self._get_transport_name()
+        args['transport'] = self._get_name()
         args['connectionToken'] = connection.connection_token
         args['connectionData'] = connection.connection_data
 

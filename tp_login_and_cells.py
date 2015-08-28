@@ -9,12 +9,13 @@ import signalr
 class UserBehavior(TaskSet):
     def on_start(self):
         """ on_start is called when a Locust start before any task is scheduled """
+        self.client.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0'
         self.login()
         self.definition = self.get_slice_definition()
         self.subscribe_to_slice_notifications()
 
     def login(self):
-        response = self.client.post("/login.aspx", data={
+        self.client.post("/login.aspx", data={
             "scriptManager": "mainPanel|btnLogin",
             "UserName": "admin",
             "Password": "admin",
@@ -31,12 +32,10 @@ class UserBehavior(TaskSet):
             "X-MicrosoftAjax": "Delta=true",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Referer": "http://localhost/targetprocess/login.aspx",
-            "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0"
         })
-        self.cookies = response.cookies
 
     def subscribe_to_slice_notifications(self):
-        connection = signalr.Connection('{0}/notifications'.format(self.parent.host), self.cookies)
+        connection = signalr.Connection('{0}/notifications'.format(self.parent.host), self.client)
 
         def notify_changed(data):
             request_success.fire(
@@ -46,7 +45,9 @@ class UserBehavior(TaskSet):
                 response_length=0,
             )
 
+        #make sure to get hubs before starting connection!
         slice_hub = connection.hub('Slice')
+        connection.start()
         slice_hub.client.notifyChanged = lambda data: notify_changed(data)
         slice_hub.server.Subscribe({
             "parameters": self.definition,
@@ -54,8 +55,6 @@ class UserBehavior(TaskSet):
             "id": "bf3a2067-4ade-e84e-3a1c-dff12f8a66e8",
             "logNotifications": None
         })
-
-        connection.start()
 
     def get_acid(self):
         response = self.client.get("/restui/board.aspx",
@@ -66,7 +65,7 @@ class UserBehavior(TaskSet):
         return urlparse.parse_qs(parsed.query).get('acid')[0]
 
     def get_slice_definition(self):
-        acid = '44F098AD502318B043828A449579B6F9'  # self.get_acid()
+        acid = '5A68575EE7C5304C39A090CDFE425EBE'  # self.get_acid()
         return {
             "base64": "true",
             "take": 125,

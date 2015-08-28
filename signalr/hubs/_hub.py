@@ -14,9 +14,8 @@ class HubServer:
             'H': self.name,
             'M': method,
             'A': [data],
-            'I': ++self.__connection.hub_send_counter
+            'I': self.__connection.increment_send_counter()
         })
-        self.__connection.hub_send_counter += 1
 
     def __getattr__(self, method):
         def _missing(data):
