@@ -29,7 +29,6 @@ class WebSocketsTransport(Transport):
         def _receive():
             while True:
                 notification = self.ws.recv()
-                print notification
                 self._handle_notification(notification)
 
         return _receive

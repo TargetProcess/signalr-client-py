@@ -12,7 +12,7 @@ class Connection:
     def __init__(self, url, session):
         self.url = url
         self.__hubs = {}
-        self.__send_counter = 0
+        self.__send_counter = -1
         self.connection_token = None
         self.connection_data = None
         self.__transport = AutoTransport(session)
@@ -21,7 +21,8 @@ class Connection:
         return json.dumps(map(lambda hub_name: {'name': hub_name}, self.__hubs))
 
     def increment_send_counter(self):
-        return ++self.__send_counter
+        self.__send_counter += 1
+        return self.__send_counter
 
     def start(self):
         self.connection_data = self.__get_connection_data()

@@ -15,6 +15,7 @@ class AutoTransport(Transport):
     def negotiate(self, connection):
         negotiate_data = Transport.negotiate(self, connection)
         self.__transport = self.__get_transport(negotiate_data)
+        self.__transport.handlers += lambda data: self.handlers.fire(data=data)
 
         return negotiate_data
 

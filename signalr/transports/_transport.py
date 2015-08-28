@@ -32,7 +32,6 @@ class Transport:
         return True
 
     def _handle_notification(self, message):
-        print message
         if len(message) == 0:
             return
 

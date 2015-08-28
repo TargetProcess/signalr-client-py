@@ -29,11 +29,11 @@ class HubClient(object):
         def handle(data):
             inner_data = data['M'][0] if 'M' in data and len(data['M']) > 0 else {}
             hub = inner_data['H'] if 'H' in inner_data else ''
-            if hub == self.name:
+            if hub.lower() == self.name.lower():
                 method = inner_data['M']
                 if method in self.__handlers:
                     arguments = inner_data['A']
-                    self.__handlers[method](arguments)
+                    self.__handlers[method].fire(data=arguments)
 
         connection.subscribe(handle)
 
