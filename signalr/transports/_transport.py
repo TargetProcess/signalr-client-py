@@ -2,7 +2,7 @@ from abc import abstractmethod
 import json
 import urllib
 
-from ._events import EventHook
+from signalr.events import EventHook
 
 
 class Transport:
