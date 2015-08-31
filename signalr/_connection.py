@@ -16,6 +16,7 @@ class Connection:
         self.connection_data = None
         self.handlers = EventHook()
         self.__transport = AutoTransport(session, self.handlers)
+        self.__greenlet = None
 
     def __get_connection_data(self):
         return json.dumps(map(lambda hub_name: {'name': hub_name}, self.__hubs))
@@ -30,10 +31,14 @@ class Connection:
         self.connection_token = negotiate_data['ConnectionToken']
 
         listener = self.__transport.start(self)
-        gevent.spawn(listener)
+        self.__greenlet = gevent.spawn(listener)
 
     def send(self, data):
         self.__transport.send(self, data)
+
+    def close(self):
+        gevent.kill(self.__greenlet)
+        self.__transport.close()
 
     def hub(self, name):
         if name not in self.__hubs:

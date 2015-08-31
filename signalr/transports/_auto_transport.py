@@ -30,5 +30,8 @@ class AutoTransport(Transport):
     def send(self, connection, data):
         self.__transport.send(connection, data)
 
+    def close(self):
+        self.__transport.close()
+
     def _get_name(self):
         return 'auto'

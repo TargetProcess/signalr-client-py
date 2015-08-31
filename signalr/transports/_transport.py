@@ -26,6 +26,10 @@ class Transport:
     def send(self, connection, data):
         pass
 
+    @abstractmethod
+    def close(self):
+        pass
+
     def accept(self, negotiate_data):
         return True
 

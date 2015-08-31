@@ -16,6 +16,12 @@ class UserBehavior(TaskSet):
     def subscribe_to_notifications(self):
         connection = CometConnection(self.parent.host, 'admin', 'admin', session=self.client)
         connection.start()
+
+        def on_quitting():
+            connection.close()
+
+        events.quitting += on_quitting
+
         slice_hub = connection.get('slice')
 
         def notify_changed(data):

@@ -45,14 +45,31 @@ class CometConnection:
     def get(self, hub_name):
         return self.__hubs[hub_name]
 
+    def close(self):
+        for hub_name in self.__hubs:
+            self.__hubs[hub_name].unsubscribe_all()
+        self.__connection.close()
+
 
 class CometHub:
     def __init__(self, hub):
         self.__hub = hub
+        self.__subscriptions = {}
 
     def subscribe(self, subscription, callback):
         self.__hub.client.on('notifyChanged', callback)
         self.__hub.server.invoke('Subscribe', subscription)
+        self.__subscriptions[subscription['id']] = callback
+
+    def __unsubscribe_core(self, subscription_id):
+        self.__hub.server.invoke('Unsubscribe', subscription_id)
+        self.__hub.client.off('notifyChanged', self.__subscriptions[subscription_id])
 
     def unsubscribe(self, subscription_id):
-        self.__hub.server.invoke('Unsubscribe', subscription_id)
+        self.__unsubscribe_core(subscription_id)
+        self.__subscriptions.pop(subscription_id)
+
+    def unsubscribe_all(self):
+        for sub_id in self.__subscriptions:
+            self.__unsubscribe_core(sub_id)
+        self.__subscriptions.clear()
