@@ -33,7 +33,7 @@ class HubClient(object):
                 method = inner_data['M']
                 if method in self.__handlers:
                     arguments = inner_data['A']
-                    self.__handlers[method].fire(data=arguments)
+                    self.__handlers[method].fire(data=arguments[0])
 
         connection.handlers += handle
 

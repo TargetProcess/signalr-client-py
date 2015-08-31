@@ -32,9 +32,8 @@ class UserBehavior(TaskSet):
                 response_length=0,
             )
 
-        slice_subscription = create_subscription(
-            client_id="slice/1438693676288/12c64e13-f776-4739-80fa-4f77d6f44e9e235",
-            parameters=self.definition)
+        slice_subscription = create_subscription(parameters=self.definition,
+                                                 client_id="slice/1438693676288/12c64e13-f776-4739-80fa-4f77d6f44e9e235")
         print 'subscribe slice'
         slice_hub.subscribe(slice_subscription, notify_changed)
 
