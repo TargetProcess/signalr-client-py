@@ -4,8 +4,8 @@ from ._transport import Transport
 
 
 class ServerSentEventsTransport(Transport):
-    def __init__(self, session):
-        Transport.__init__(self, session)
+    def __init__(self, session, event_handlers):
+        Transport.__init__(self, session, event_handlers)
 
     def _get_name(self):
         return 'serverSentEvents'

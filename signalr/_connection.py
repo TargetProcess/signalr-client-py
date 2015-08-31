@@ -1,7 +1,6 @@
 import json
-
 import gevent
-
+from signalr.events import EventHook
 from signalr.hubs import Hub
 from signalr.transports import AutoTransport
 
@@ -15,7 +14,8 @@ class Connection:
         self.__send_counter = -1
         self.connection_token = None
         self.connection_data = None
-        self.__transport = AutoTransport(session)
+        self.handlers = EventHook()
+        self.__transport = AutoTransport(session, self.handlers)
 
     def __get_connection_data(self):
         return json.dumps(map(lambda hub_name: {'name': hub_name}, self.__hubs))
@@ -33,10 +33,10 @@ class Connection:
         gevent.spawn(listener)
 
     def subscribe(self, handler):
-        self.__transport.handlers += handler
+        self.handlers += handler
 
     def unsubscribe(self, handler):
-        self.__transport.handlers -= handler
+        self.handlers -= handler
 
     def send(self, data):
         self.__transport.send(self, data)

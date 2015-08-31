@@ -4,18 +4,17 @@ from ._ws_transport import WebSocketsTransport
 
 
 class AutoTransport(Transport):
-    def __init__(self, session):
-        Transport.__init__(self, session)
+    def __init__(self, session, event_handlers):
+        Transport.__init__(self, session, event_handlers)
         self.__available_transports = [
-            WebSocketsTransport(session),
-            ServerSentEventsTransport(session)
+            WebSocketsTransport(session, event_handlers),
+            ServerSentEventsTransport(session, event_handlers)
         ]
         self.__transport = None
 
     def negotiate(self, connection):
         negotiate_data = Transport.negotiate(self, connection)
         self.__transport = self.__get_transport(negotiate_data)
-        self.__transport.handlers += lambda data: self.handlers.fire(data=data)
 
         return negotiate_data
 

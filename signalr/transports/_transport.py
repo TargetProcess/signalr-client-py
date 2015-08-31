@@ -2,13 +2,11 @@ from abc import abstractmethod
 import json
 import urllib
 
-from signalr.events import EventHook
-
 
 class Transport:
-    def __init__(self, session):
+    def __init__(self, session, event_handlers):
         self._session = session
-        self.handlers = EventHook()
+        self.__handlers = event_handlers
 
     @abstractmethod
     def _get_name(self):
@@ -36,7 +34,7 @@ class Transport:
             return
 
         data = json.loads(message)
-        self.handlers.fire(data=data)
+        self.__handlers.fire(data=data)
 
     def _get_url(self, connection, action, **kwargs):
         args = kwargs.copy()
