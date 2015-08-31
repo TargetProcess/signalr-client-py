@@ -35,7 +35,7 @@ class HubClient(object):
                     arguments = inner_data['A']
                     self.__handlers[method].fire(data=arguments)
 
-        connection.subscribe(handle)
+        connection.handlers += handle
 
     def on(self, method, handler):
         if method not in self.__handlers:

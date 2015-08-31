@@ -32,12 +32,6 @@ class Connection:
         listener = self.__transport.start(self)
         gevent.spawn(listener)
 
-    def subscribe(self, handler):
-        self.handlers += handler
-
-    def unsubscribe(self, handler):
-        self.handlers -= handler
-
     def send(self, data):
         self.__transport.send(self, data)
 
