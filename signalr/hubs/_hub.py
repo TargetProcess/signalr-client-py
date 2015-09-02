@@ -33,7 +33,7 @@ class HubClient(object):
                 method = inner_data['M']
                 if method in self.__handlers:
                     arguments = inner_data['A']
-                    self.__handlers[method].fire(data=arguments[0])
+                    self.__handlers[method].fire(data=DictToObj(arguments[0]))
 
         connection.handlers += handle
 
@@ -45,3 +45,8 @@ class HubClient(object):
     def off(self, method, handler):
         if method in self.__handlers:
             self.__handlers[method] -= handler
+
+
+class DictToObj:
+    def __init__(self, d):
+        self.__dict__ = d
