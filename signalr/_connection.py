@@ -31,7 +31,12 @@ class Connection:
         self.connection_token = negotiate_data['ConnectionToken']
 
         listener = self.__transport.start(self)
-        self.__greenlet = gevent.spawn(listener)
+
+        def wrapped_listener():
+            listener()
+            gevent.sleep(0)
+
+        self.__greenlet = gevent.spawn(wrapped_listener)
 
     def send(self, data):
         self.__transport.send(self, data)
