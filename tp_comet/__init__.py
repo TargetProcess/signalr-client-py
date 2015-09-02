@@ -1,2 +1,0 @@
-from _comet_connection import CometConnection
-from _subscription import create_subscription
