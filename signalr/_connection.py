@@ -43,7 +43,7 @@ class Connection:
 
     def close(self):
         gevent.kill(self.__greenlet)
-        self.__transport.close()
+        self.__transport.close(self)
 
     def hub(self, name):
         if name not in self.__hubs:

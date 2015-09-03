@@ -36,7 +36,7 @@ class WebSocketsTransport(Transport):
     def send(self, connection, data):
         self.ws.send(json.dumps(data))
 
-    def close(self):
+    def close(self, connection):
         self.ws.close()
 
     def accept(self, negotiate_data):
