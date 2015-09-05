@@ -2,7 +2,6 @@ import json
 import urlparse
 
 from websocket import create_connection
-
 from ._transport import Transport
 
 
