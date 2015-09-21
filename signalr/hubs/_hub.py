@@ -3,6 +3,7 @@ from signalr.events import EventHook
 
 class Hub:
     def __init__(self, name, connection):
+        self.name = name
         self.server = HubServer(name, connection)
         self.client = HubClient(name, connection)
 
