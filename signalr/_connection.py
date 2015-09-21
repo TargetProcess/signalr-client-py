@@ -50,3 +50,11 @@ class Connection:
             self.__hubs[name] = Hub(name, self)
             self.connection_data = self.__get_connection_data()
         return self.__hubs[name]
+
+    def __enter__(self):
+        self.start()
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
