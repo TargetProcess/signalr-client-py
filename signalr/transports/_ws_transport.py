@@ -41,9 +41,14 @@ class WebSocketsTransport(Transport):
     def accept(self, negotiate_data):
         return bool(negotiate_data['TryWebSockets'])
 
+    class HeadersLoader(object):
+        def __init__(self, headers):
+            self.headers = headers
+
     def __get_headers(self):
         headers = self._session.headers
-
+        loader = WebSocketsTransport.HeadersLoader(headers)
+        self._session.auth(loader)
         return map(lambda name: '{name}: {value}'.format(name=name, value=headers[name]), headers)
 
     def __get_cookie_str(self):
