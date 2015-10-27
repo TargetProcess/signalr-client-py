@@ -4,15 +4,14 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
-#with io.open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
-#    long_description = f.read()
+with io.open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
+   long_description = f.read()
 
 setup(
     name='signalr-client',
-    version='0.0.4',
+    version='0.0.5',
     description='Simple SignalR client for Python',
-    #long_description=long_description,
-    long_description="in progress",
+    long_description=long_description,
     url='https://github.com/TargetProcess/signalr-client-py',
     author='Taucraft Limited',
     author_email='info@taucraft.com',
