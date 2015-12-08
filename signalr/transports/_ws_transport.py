@@ -1,5 +1,5 @@
 import json
-import urlparse
+import urllib.parse
 
 from websocket import create_connection
 from ._transport import Transport
@@ -14,11 +14,11 @@ class WebSocketsTransport(Transport):
         return 'webSockets'
 
     def _get_transport_specific_url(self, url):
-        parsed = urlparse.urlparse(url)
+        parsed = urllib.parse.urlparse(url)
         scheme = 'wss' if parsed.scheme == 'https' else 'ws'
         url_data = (scheme, parsed.netloc, parsed.path, parsed.params, parsed.query, parsed.fragment)
 
-        return urlparse.urlunparse(url_data)
+        return urllib.parse.urlunparse(url_data)
 
     def start(self, connection):
         self.ws = create_connection(self._get_url(connection, 'connect'),
@@ -49,9 +49,10 @@ class WebSocketsTransport(Transport):
         headers = self._session.headers
         loader = WebSocketsTransport.HeadersLoader(headers)
         self._session.auth(loader)
-        return map(lambda name: '{name}: {value}'.format(name=name, value=headers[name]), headers)
+        return ['%s: %s' % (name, headers[name]) for name in headers]
 
     def __get_cookie_str(self):
-        return '; '.join(
-            map(lambda (name, value): '{name}={value}'.format(name=name, value=value),
-                self._session.cookies.iteritems()))
+        return '; '.join([
+            '%s=%s' % (name, value)
+            for name, value in self._session.cookies.items()
+        ])

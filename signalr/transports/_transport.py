@@ -1,6 +1,6 @@
 from abc import abstractmethod
 import json
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 
 class Transport:
@@ -16,7 +16,7 @@ class Transport:
         url = self.__get_base_url(connection.url, connection, 'negotiate', connectionData=connection.connection_data)
         negotiate = self._session.get(url)
 
-        return json.loads(negotiate.content)
+        return negotiate.json()
 
     @abstractmethod
     def start(self, connection):
@@ -56,7 +56,7 @@ class Transport:
     def __get_base_url(url, connection, action, **kwargs):
         args = kwargs.copy()
         args['clientProtocol'] = connection.protocol_version
-        query = '&'.join(map(lambda key: '{key}={value}'.format(key=key, value=urllib.quote_plus(args[key])), args))
+        query = '&'.join(['{key}={value}'.format(key=key, value=urllib.parse.quote_plus(args[key])) for key in args])
 
         return '{url}/{action}?{query}'.format(url=url,
                                                action=action,
