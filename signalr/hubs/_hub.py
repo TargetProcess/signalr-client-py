@@ -17,7 +17,7 @@ class HubServer:
         self.__connection.send({
             'H': self.name,
             'M': method,
-            'A': [data],
+            'A': data,
             'I': self.__connection.increment_send_counter()
         })
 
