@@ -1,5 +1,10 @@
 import json
-import urllib.parse
+import sys
+
+if sys.version_info[0] < 3:
+    from urlparse import urlparse, urlunparse
+else:
+    from urllib.parse import urlparse, urlunparse
 
 from websocket import create_connection
 from ._transport import Transport
@@ -14,11 +19,11 @@ class WebSocketsTransport(Transport):
         return 'webSockets'
 
     def _get_transport_specific_url(self, url):
-        parsed = urllib.parse.urlparse(url)
+        parsed = urlparse(url)
         scheme = 'wss' if parsed.scheme == 'https' else 'ws'
         url_data = (scheme, parsed.netloc, parsed.path, parsed.params, parsed.query, parsed.fragment)
 
-        return urllib.parse.urlunparse(url_data)
+        return urlunparse(url_data)
 
     def start(self, connection):
         self.ws = create_connection(self._get_url(connection, 'connect'),

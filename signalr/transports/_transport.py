@@ -1,7 +1,11 @@
 from abc import abstractmethod
 import json
-import urllib.request, urllib.parse, urllib.error
+import sys
 
+if sys.version_info[0] < 3:
+    from urllib import quote_plus
+else:
+    from urllib.parse import quote_plus
 
 class Transport:
     def __init__(self, session, event_handlers):
@@ -56,7 +60,7 @@ class Transport:
     def __get_base_url(url, connection, action, **kwargs):
         args = kwargs.copy()
         args['clientProtocol'] = connection.protocol_version
-        query = '&'.join(['{key}={value}'.format(key=key, value=urllib.parse.quote_plus(args[key])) for key in args])
+        query = '&'.join(['{key}={value}'.format(key=key, value=quote_plus(args[key])) for key in args])
 
         return '{url}/{action}?{query}'.format(url=url,
                                                action=action,
