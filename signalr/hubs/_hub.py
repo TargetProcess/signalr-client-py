@@ -13,7 +13,7 @@ class HubServer:
         self.name = name
         self.__connection = connection
 
-    def invoke(self, method, data):
+    def invoke(self, method, *data):
         self.__connection.send({
             'H': self.name,
             'M': method,
