@@ -19,7 +19,7 @@ class Connection:
         self.__greenlet = None
 
     def __get_connection_data(self):
-        return json.dumps(map(lambda hub_name: {'name': hub_name}, self.__hubs))
+        return json.dumps([{'name': hub_name} for hub_name in self.__hubs])
 
     def increment_send_counter(self):
         self.__send_counter += 1
