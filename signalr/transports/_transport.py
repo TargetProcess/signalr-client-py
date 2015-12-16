@@ -7,6 +7,8 @@ if sys.version_info[0] < 3:
 else:
     from urllib.parse import quote_plus
 
+import gevent
+
 class Transport:
     def __init__(self, session, event_handlers):
         self._session = session
@@ -43,6 +45,7 @@ class Transport:
 
         data = json.loads(message)
         self.__handlers.fire(data=data)
+        gevent.sleep(0)
 
     def _get_url(self, connection, action, **kwargs):
         args = kwargs.copy()
