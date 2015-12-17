@@ -10,6 +10,6 @@ class EventHook(object):
         self._handlers.remove(handler)
         return self
 
-    def fire(self, **kwargs):
+    def fire(self, *args, **kwargs):
         for handler in self._handlers:
-            handler(**kwargs)
+            handler(*args, **kwargs)

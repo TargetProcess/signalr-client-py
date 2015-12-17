@@ -38,6 +38,9 @@ class Connection:
 
         self.__greenlet = gevent.spawn(wrapped_listener)
 
+    def wait(self, timeout=30):
+        gevent.joinall([self.__greenlet], timeout)
+
     def send(self, data):
         self.__transport.send(self, data)
 

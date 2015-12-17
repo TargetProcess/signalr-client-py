@@ -27,14 +27,14 @@ class HubClient(object):
         self.name = name
         self.__handlers = {}
 
-        def handle(data):
-            inner_data = data['M'][0] if 'M' in data and len(data['M']) > 0 else {}
+        def handle(**kwargs):
+            inner_data = kwargs['M'][0] if 'M' in kwargs and len(kwargs['M']) > 0 else {}
             hub = inner_data['H'] if 'H' in inner_data else ''
             if hub.lower() == self.name.lower():
                 method = inner_data['M']
                 if method in self.__handlers:
                     arguments = inner_data['A']
-                    self.__handlers[method].fire(data=DictToObj(arguments[0]))
+                    self.__handlers[method].fire(*arguments)
 
         connection.handlers += handle
 

@@ -44,7 +44,7 @@ class Transport:
             return
 
         data = json.loads(message)
-        self.__handlers.fire(data=data)
+        self.__handlers.fire(**data)
         gevent.sleep(0)
 
     def _get_url(self, connection, action, **kwargs):
