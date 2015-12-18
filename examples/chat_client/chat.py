@@ -8,7 +8,7 @@ from signalr import Connection
 
 with Session() as session:
     connection = Connection("http://localhost:5000/signalr", session)
-    chat = connection.hub('chat')
+    chat = connection.register_hub('chat')
 
 
     def print_data(data, timestamp):

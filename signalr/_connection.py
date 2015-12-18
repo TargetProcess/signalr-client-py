@@ -54,10 +54,16 @@ class Connection:
         gevent.kill(self.__greenlet)
         self.__transport.close()
 
-    def hub(self, name):
+    def register_hub(self, name):
         if name not in self.__hubs:
+            if self.started:
+                raise RuntimeError(
+                    'Cannot create new hub because connection is already started.')
+
             self.__hubs[name] = Hub(name, self)
-            self.connection_data = self.__get_connection_data()
+        return self.__hubs[name]
+
+    def hub(self, name):
         return self.__hubs[name]
 
     def __enter__(self):
