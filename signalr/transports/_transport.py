@@ -9,31 +9,35 @@ else:
 
 import gevent
 
+
 class Transport:
-    def __init__(self, session, event_handlers):
+    def __init__(self, session, connection):
         self._session = session
-        self.__handlers = event_handlers
+        self._connection = connection
 
     @abstractmethod
     def _get_name(self):
         pass
 
-    def negotiate(self, connection):
-        url = self.__get_base_url(connection.url, connection, 'negotiate', connectionData=connection.connection_data)
+    def negotiate(self):
+        url = self.__get_base_url(self._connection.url,
+                                  self._connection,
+                                  'negotiate',
+                                  connectionData=self._connection.data)
         negotiate = self._session.get(url)
 
         return negotiate.json()
 
     @abstractmethod
-    def start(self, connection):
+    def start(self):
         pass
 
     @abstractmethod
-    def send(self, connection, data):
+    def send(self, data):
         pass
 
     @abstractmethod
-    def close(self, connection):
+    def close(self):
         pass
 
     def accept(self, negotiate_data):
@@ -44,17 +48,18 @@ class Transport:
             return
 
         data = json.loads(message)
-        self.__handlers.fire(**data)
+        self._connection.received.fire(**data)
         gevent.sleep(0)
 
-    def _get_url(self, connection, action, **kwargs):
+    def _get_url(self, action, **kwargs):
         args = kwargs.copy()
         args['transport'] = self._get_name()
-        args['connectionToken'] = connection.connection_token
-        args['connectionData'] = connection.connection_data
+        args['connectionToken'] = self._connection.token
+        args['connectionData'] = self._connection.data
 
-        url = self._get_transport_specific_url(connection.url)
-        return self.__get_base_url(url, connection, action, **args)
+        url = self._get_transport_specific_url(self._connection.url)
+
+        return self.__get_base_url(url, self._connection, action, **args)
 
     def _get_transport_specific_url(self, url):
         return url

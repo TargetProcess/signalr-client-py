@@ -11,8 +11,8 @@ from ._transport import Transport
 
 
 class WebSocketsTransport(Transport):
-    def __init__(self, session, event_handlers):
-        Transport.__init__(self, session, event_handlers)
+    def __init__(self, session, connection):
+        Transport.__init__(self, session, connection)
         self.ws = None
 
     def _get_name(self):
@@ -25,8 +25,8 @@ class WebSocketsTransport(Transport):
 
         return urlunparse(url_data)
 
-    def start(self, connection):
-        self.ws = create_connection(self._get_url(connection, 'connect'),
+    def start(self):
+        self.ws = create_connection(self._get_url('connect'),
                                     header=self.__get_headers(),
                                     cookie=self.__get_cookie_str())
 
@@ -37,10 +37,10 @@ class WebSocketsTransport(Transport):
 
         return _receive
 
-    def send(self, connection, data):
-        self.ws.send(json.dumps(data))
+    def send(self, data):
+        return self.ws.send(json.dumps(data))
 
-    def close(self, connection):
+    def close(self):
         self.ws.close()
 
     def accept(self, negotiate_data):

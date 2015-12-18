@@ -12,41 +12,47 @@ class Connection:
         self.url = url
         self.__hubs = {}
         self.__send_counter = -1
-        self.connection_token = None
-        self.connection_data = None
-        self.handlers = EventHook()
-        self.__transport = AutoTransport(session, self.handlers)
+        self.token = None
+        self.data = None
+        self.received = EventHook()
+        self.starting = EventHook()
+        self.__transport = AutoTransport(session, self)
         self.__greenlet = None
+        self.started = False
 
-    def __get_connection_data(self):
-        return json.dumps([{'name': hub_name} for hub_name in self.__hubs])
+        self.starting += self.__set_data
+
+    def __set_data(self):
+        self.data = json.dumps([{'name': hub_name} for hub_name in self.__hubs])
 
     def increment_send_counter(self):
         self.__send_counter += 1
         return self.__send_counter
 
     def start(self):
-        self.connection_data = self.__get_connection_data()
-        negotiate_data = self.__transport.negotiate(self)
-        self.connection_token = negotiate_data['ConnectionToken']
+        self.starting.fire()
 
-        listener = self.__transport.start(self)
+        negotiate_data = self.__transport.negotiate()
+        self.token = negotiate_data['ConnectionToken']
+
+        listener = self.__transport.start()
 
         def wrapped_listener():
             listener()
             gevent.sleep(0)
 
         self.__greenlet = gevent.spawn(wrapped_listener)
+        self.started = True
 
     def wait(self, timeout=30):
-        gevent.joinall([self.__greenlet], timeout)
+        gevent.sleep(timeout)
 
     def send(self, data):
-        self.__transport.send(self, data)
+        return self.__transport.send(data)
 
     def close(self):
         gevent.kill(self.__greenlet)
-        self.__transport.close(self)
+        self.__transport.close()
 
     def hub(self, name):
         if name not in self.__hubs:

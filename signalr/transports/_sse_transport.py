@@ -4,16 +4,16 @@ from ._transport import Transport
 
 
 class ServerSentEventsTransport(Transport):
-    def __init__(self, session, event_handlers):
-        Transport.__init__(self, session, event_handlers)
+    def __init__(self, session, connection):
+        Transport.__init__(self, session, connection)
         self.__response = None
 
     def _get_name(self):
         return 'serverSentEvents'
 
-    def start(self, connection):
-        self.__response = sseclient.SSEClient(self._get_url(connection, 'connect'), session=self._session)
-        self._session.get(self._get_url(connection, 'start'))
+    def start(self):
+        self.__response = sseclient.SSEClient(self._get_url('connect'), session=self._session)
+        self._session.get(self._get_url('start'))
 
         def _receive():
             for notification in self.__response:
@@ -22,8 +22,8 @@ class ServerSentEventsTransport(Transport):
 
         return _receive
 
-    def send(self, connection, data):
-        self._session.post(self._get_url(connection, 'send'), data={'data': json.dumps(data)})
+    def send(self, data):
+        return self._session.post(self._get_url('send'), data={'data': json.dumps(data)})
 
-    def close(self, connection):
-        self._session.get(self._get_url(connection, 'abort'))
+    def close(self):
+        self._session.get(self._get_url('abort'))

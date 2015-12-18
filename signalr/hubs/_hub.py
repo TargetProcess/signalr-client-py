@@ -1,3 +1,5 @@
+import json
+
 from signalr.events import EventHook
 
 
@@ -14,12 +16,14 @@ class HubServer:
         self.__connection = connection
 
     def invoke(self, method, *data):
-        self.__connection.send({
+        response = self.__connection.send({
             'H': self.name,
             'M': method,
             'A': data,
             'I': self.__connection.increment_send_counter()
         })
+
+        return json.loads(response.content)
 
 
 class HubClient(object):
@@ -36,7 +40,7 @@ class HubClient(object):
                     arguments = inner_data['A']
                     self.__handlers[method].fire(*arguments)
 
-        connection.handlers += handle
+        connection.received += handle
 
     def on(self, method, handler):
         if method not in self.__handlers:
