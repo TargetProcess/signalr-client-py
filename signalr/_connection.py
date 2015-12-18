@@ -15,7 +15,9 @@ class Connection:
         self.token = None
         self.data = None
         self.received = EventHook()
+        self.error = EventHook()
         self.starting = EventHook()
+        self.stopping = EventHook()
         self.__transport = AutoTransport(session, self)
         self.__greenlet = None
         self.started = False
@@ -48,7 +50,9 @@ class Connection:
         gevent.sleep(timeout)
 
     def send(self, data):
-        return self.__transport.send(data)
+        response = self.__transport.send(data)
+
+        return json.loads(response.content)
 
     def close(self):
         gevent.kill(self.__greenlet)

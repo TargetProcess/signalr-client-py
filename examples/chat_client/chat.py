@@ -1,6 +1,5 @@
 from requests import Session
 from requests.auth import HTTPBasicAuth
-
 from signalr import Connection
 
 with Session() as session:
@@ -8,26 +7,32 @@ with Session() as session:
     chat = connection.register_hub('chat')
 
 
-    def print_data(data, timestamp):
-        print(data, timestamp)
+    def print_received_message(data, timestamp):
+        print('received: ', data, timestamp)
 
 
     def print_topic(topic):
-        print(topic)
+        print('topic: ', topic)
 
 
-    chat.client.on('newMessageReceived', print_data)
+    def print_error(error):
+        print('error: ', error)
+
+
+    chat.client.on('newMessageReceived', print_received_message)
     chat.client.on('topicChanged', print_topic)
 
+    chat.error += print_error
+
     with connection:
-        send = chat.server.invoke('send', 'Python is here')
-        set_topic = chat.server.invoke('setTopic', 'Python!')
+        chat.server.invoke('send', 'Python is here')
+        chat.server.invoke('setTopic', 'Topic from python client')
 
         session.auth = HTTPBasicAuth("known", "user")
-        chat.server.invoke('setTopic', 'No anonymity any more')
+        chat.server.invoke('setTopic', 'Topic is set by known user')
 
         connection.wait(5)
 
-        chat.server.invoke('send', 'Shutting down')
+        chat.server.invoke('send', 'Bye-bye!')
 
         connection.wait(2)

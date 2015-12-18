@@ -6,14 +6,16 @@ from signalr.events import EventHook
 class Hub:
     def __init__(self, name, connection):
         self.name = name
-        self.server = HubServer(name, connection)
+        self.server = HubServer(name, connection, self)
         self.client = HubClient(name, connection)
+        self.error = EventHook()
 
 
 class HubServer:
-    def __init__(self, name, connection):
+    def __init__(self, name, connection, hub):
         self.name = name
         self.__connection = connection
+        self.__hub = hub
 
     def invoke(self, method, *data):
         response = self.__connection.send({
@@ -23,7 +25,10 @@ class HubServer:
             'I': self.__connection.increment_send_counter()
         })
 
-        return json.loads(response.content)
+        if 'E' in response:
+            self.__hub.error.fire(response['E'])
+
+        return response
 
 
 class HubClient(object):
