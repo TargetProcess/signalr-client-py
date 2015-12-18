@@ -1,8 +1,5 @@
 from requests import Session
 from requests.auth import HTTPBasicAuth
-from gevent import monkey
-
-monkey.patch_socket()
 
 from signalr import Connection
 
