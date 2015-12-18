@@ -11,16 +11,20 @@ $(function(){
 		$textArea.text(text);
 	};
 	
-	chat.client.topicChanged = function(topic) {
-		$('#topic').text(topic);
+	chat.client.topicChanged = function(topic, user) {
+		$('#topic').text(topic + ' set by ' + user);
 	};
 	
 	$.connection.hub.error(function(error) {
-		text = text + 'Someone failed: ' + error + '\n';
+		text = text + 'Houston, we have a problem! ' + error + '\n';
 		$textArea.text(text);
 	});
 	
 	$.connection.hub.start({transport: 'auto'}, function() {
 		chat.server.send('Incoming!');
+		chat.server.requestError().fail(function(error) {
+			text = text + 'Houston, we have a problem! ' + error + '\n';
+			$textArea.text(text);
+		});
 	});
 });

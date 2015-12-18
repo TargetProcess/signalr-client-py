@@ -22,6 +22,15 @@ class Connection:
         self.__greenlet = None
         self.started = False
 
+        def handle_error(**kwargs):
+            error = kwargs["E"] if "E" in kwargs else None
+            if error is None:
+                return
+
+            self.error.fire(error)
+
+        self.received += handle_error
+
         self.starting += self.__set_data
 
     def __set_data(self):
@@ -47,12 +56,10 @@ class Connection:
         self.started = True
 
     def wait(self, timeout=30):
-        gevent.sleep(timeout)
+        gevent.joinall([self.__greenlet], timeout)
 
     def send(self, data):
-        response = self.__transport.send(data)
-
-        return json.loads(response.content)
+        self.__transport.send(data)
 
     def close(self):
         gevent.kill(self.__greenlet)

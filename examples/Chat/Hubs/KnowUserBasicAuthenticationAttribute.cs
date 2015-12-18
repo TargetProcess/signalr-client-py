@@ -13,29 +13,36 @@ namespace Chat.Hubs
 		private readonly string _realm = "Chat";
 		private readonly string _role = "user";
 		private readonly string _username = "known";
-		
+
+	    public override bool AuthorizeHubConnection(HubDescriptor hubDescriptor, HttpRequest request)
+	    {
+			return AuthenticateCore(request);
+		}
+
 	    public override bool AuthorizeHubMethodInvocation(IHubIncomingInvokerContext hubIncomingInvokerContext, bool appliesToMethod)
 	    {
-		    var request = hubIncomingInvokerContext.Hub.Context.Request;
+		    return AuthenticateCore(hubIncomingInvokerContext.Hub.Context.Request);
+	    }
+
+	    private bool AuthenticateCore(HttpRequest request)
+	    {
 		    var httpContext = request.HttpContext;
-			var authorization = request.Headers["Authorization"];
+		    var authorization = request.Headers["Authorization"];
 
-			if (!string.IsNullOrEmpty(authorization))
-			{
-				var cred = Encoding.ASCII.GetString(Convert.FromBase64String(authorization.ToString().Substring(6))).Split(':');
-				var user = new { Name = cred[0], Pass = cred[1] };
+		    if (!string.IsNullOrEmpty(authorization))
+		    {
+			    var cred = Encoding.ASCII.GetString(Convert.FromBase64String(authorization.ToString().Substring(6))).Split(':');
+			    var user = new {Name = cred[0], Pass = cred[1]};
 
-				if (user.Name == _username && user.Pass == _password)
-				{
-					httpContext.User = new GenericPrincipal(new GenericIdentity(_username), new[] { _role });
+			    if (user.Name == _username && user.Pass == _password)
+			    {
+				    httpContext.User = new GenericPrincipal(new GenericIdentity(_username), new[] {_role});
 
-					return true;
-				}
-			}
+				    return true;
+			    }
+		    }
 
-			httpContext.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"{_realm ?? "Chat"}\"");
-
-			return false;
-		}
+		    return false;
+	    }
 	}
 }

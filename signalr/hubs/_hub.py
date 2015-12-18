@@ -1,5 +1,3 @@
-import json
-
 from signalr.events import EventHook
 
 
@@ -18,17 +16,12 @@ class HubServer:
         self.__hub = hub
 
     def invoke(self, method, *data):
-        response = self.__connection.send({
+        self.__connection.send({
             'H': self.name,
             'M': method,
             'A': data,
             'I': self.__connection.increment_send_counter()
         })
-
-        if 'E' in response:
-            self.__hub.error.fire(response['E'])
-
-        return response
 
 
 class HubClient(object):
@@ -37,13 +30,14 @@ class HubClient(object):
         self.__handlers = {}
 
         def handle(**kwargs):
-            inner_data = kwargs['M'][0] if 'M' in kwargs and len(kwargs['M']) > 0 else {}
-            hub = inner_data['H'] if 'H' in inner_data else ''
-            if hub.lower() == self.name.lower():
-                method = inner_data['M']
-                if method in self.__handlers:
-                    arguments = inner_data['A']
-                    self.__handlers[method].fire(*arguments)
+            messages = kwargs['M'] if 'M' in kwargs and len(kwargs['M']) > 0 else {}
+            for inner_data in messages:
+                hub = inner_data['H'] if 'H' in inner_data else ''
+                if hub.lower() == self.name.lower():
+                    method = inner_data['M']
+                    if method in self.__handlers:
+                        arguments = inner_data['A']
+                        self.__handlers[method].fire(*arguments)
 
         connection.received += handle
 

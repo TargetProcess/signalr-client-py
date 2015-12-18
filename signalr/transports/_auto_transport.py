@@ -28,7 +28,7 @@ class AutoTransport(Transport):
         return self.__transport.start()
 
     def send(self, data):
-        return self.__transport.send(data)
+        self.__transport.send(data)
 
     def close(self):
         self.__transport.close()

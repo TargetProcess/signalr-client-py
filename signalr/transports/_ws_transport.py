@@ -1,6 +1,8 @@
 import json
 import sys
 
+import gevent
+
 if sys.version_info[0] < 3:
     from urlparse import urlparse, urlunparse
 else:
@@ -14,6 +16,7 @@ class WebSocketsTransport(Transport):
     def __init__(self, session, connection):
         Transport.__init__(self, session, connection)
         self.ws = None
+        self.__requests = {}
 
     def _get_name(self):
         return 'webSockets'
@@ -28,17 +31,18 @@ class WebSocketsTransport(Transport):
     def start(self):
         self.ws = create_connection(self._get_url('connect'),
                                     header=self.__get_headers(),
-                                    cookie=self.__get_cookie_str())
+                                    cookie=self.__get_cookie_str(),
+                                    enable_multithread=True)
 
         def _receive():
-            while True:
-                notification = self.ws.recv()
+            for notification in self.ws:
                 self._handle_notification(notification)
 
         return _receive
 
     def send(self, data):
-        return self.ws.send(json.dumps(data))
+        self.ws.send(json.dumps(data))
+        gevent.sleep()
 
     def close(self):
         self.ws.close()
@@ -53,8 +57,10 @@ class WebSocketsTransport(Transport):
     def __get_headers(self):
         headers = self._session.headers
         loader = WebSocketsTransport.HeadersLoader(headers)
+
         if self._session.auth:
             self._session.auth(loader)
+
         return ['%s: %s' % (name, headers[name]) for name in headers]
 
     def __get_cookie_str(self):
