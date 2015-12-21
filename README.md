@@ -79,17 +79,28 @@ with Session() as session:
 
 There is a [sample application](https://github.com/TargetProcess/signalr-client-py/tree/develop/examples/Chat)
 (ASP.NET vNext chat app) in examples folder. To run it:
+
 1. Install ASP.NET 5 RC.
+
     1) [Windows installation instructions](http://docs.asp.net/en/latest/getting-started/installing-on-windows.html).
+
     2) [Mac OS X installation instructions](http://docs.asp.net/en/latest/getting-started/installing-on-mac.html).
+    
     3) [Linux installation instructions](http://docs.asp.net/en/latest/getting-started/installing-on-linux.html).
+    
 2. Go to examples/Chat folder.
-3. ```dnvm upgrade```
-4. ```dnu restore```
-5. Install node and npm
-6. ```npm install```
-7. ```gulp```
-8. ```dnx web```
+
+3. ```dnvm upgrade ```
+
+4. ```dnu restore ```
+
+5. Install node and npm.
+
+6. ```npm install ```
+
+7. ```gulp ```
+
+8. ```dnx web ```
 
 
 ## Troubleshooting
