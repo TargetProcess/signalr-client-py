@@ -9,7 +9,7 @@ with io.open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
 
 setup(
     name='signalr-client',
-    version='0.0.5',
+    version='0.0.6',
     description='Simple SignalR client for Python',
     long_description=long_description,
     url='https://github.com/TargetProcess/signalr-client-py',

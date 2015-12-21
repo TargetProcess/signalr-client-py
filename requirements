@@ -1,0 +1,3 @@
+gevent>=1.1rc1
+sseclient>=0.0.3
+websocket-client>=0.34.0

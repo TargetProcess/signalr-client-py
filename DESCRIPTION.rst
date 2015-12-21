@@ -3,53 +3,78 @@ signalr-client-py
 
 Python client proxy for `SignalR <http://signalr.net/>`_.
 
+
 Requirements
 ------------
 
-Install the following prerequisites using `pip`:
+Install requirements by running::
 
-* `gevent`
-* `sseclient`
-* `websocket-client`
+    pip install -r requirements
 
-The `gevent` package in turn requires Python headers.
+
+Signalr client is based on `gevent` which in turn requires Python headers.
 In Debian based distributions (such as Ubuntu and Raspbian) they are called `python-dev`.
+
 
 Compatibility
 -------------
 
 Compatible with Python 2 and 3.
 
-For Python 3, you need to install a version of `gevent` >= 1.1rc1.
 
 Usage
 -----
 Here is sample usage::
 
-   #create a connection
-   connection = Connection(url, session)
+    from requests import Session
+    from signalr import Connection
 
-   #start a connection
-   connection.start()
+    with Session() as session:
+        #create a connection
+        connection = Connection("http://localhost:5000/signalr", session)
 
-   #add a handler to process notifications to the connection
-   connection.handlers += lambda data: print 'Connection: new notification.', data
+        #get chat hub
+        chat = connection.register_hub('chat')
 
-   #get chat hub
-   chat_hub = connection.hub('chat')
+        #start a connection
+        connection.start()
 
-   #create new chat message handler
-   def message_received(message):
-       print 'Hub: New message.', message
+        #create new chat message handler
+        def print_received_message(data):
+            print('received: ', data)
 
-   #receive new chat messages from the hub
-   chat_hub.client.on('message_received', message_received)
+        #create new chat topic handler
+        def print_topic(topic, user):
+            print('topic: ', topic, user)
 
-   #send a new message to the hub
-   chat_hub.server.invoke('send_message', 'Hello!')
+        #create error handler
+        def print_error(error):
+            print('error: ', error)
 
-   #do not receive new messages
-   chat_hub.client.off('message_received', message_received)
+        #receive new chat messages from the hub
+        chat.client.on('newMessageReceived', print_received_message)
 
-   #close the connection
-   connection.close()
+        #change chat topic
+        chat.client.on('topicChanged', print_topic)
+
+        #process errors
+        connection.error += print_error
+
+        #start connection, optionally can be connection.start()
+        with connection:
+
+            #post new message
+            chat.server.invoke('send', 'Python is here')
+
+            #change chat topic
+            chat.server.invoke('setTopic', 'Welcome python!')
+
+            #invoke server method that throws error
+            chat.server.invoke('requestError')
+
+            #post another message
+            chat.server.invoke('send', 'Bye-bye!')
+
+            #wait a second before exit
+            connection.wait(1)
+
