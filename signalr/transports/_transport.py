@@ -67,6 +67,7 @@ class Transport:
     @staticmethod
     def __get_base_url(url, connection, action, **kwargs):
         args = kwargs.copy()
+        args.update(connection.qs)
         args['clientProtocol'] = connection.protocol_version
         query = '&'.join(['{key}={value}'.format(key=key, value=quote_plus(args[key])) for key in args])
 
