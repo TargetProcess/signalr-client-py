@@ -26,6 +26,8 @@ class Transport:
                                   connectionData=self._connection.data)
         negotiate = self._session.get(url)
 
+        negotiate.raise_for_status()
+
         return negotiate.json()
 
     @abstractmethod
