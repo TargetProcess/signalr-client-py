@@ -51,7 +51,7 @@ class Connection:
 
         def wrapped_listener():
             listener()
-            gevent.sleep(0)
+            gevent.sleep()
 
         self.__greenlet = gevent.spawn(wrapped_listener)
         self.started = True

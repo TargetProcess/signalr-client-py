@@ -46,12 +46,10 @@ class Transport:
         return True
 
     def _handle_notification(self, message):
-        if len(message) == 0:
-            return
-
-        data = json.loads(message)
-        self._connection.received.fire(**data)
-        gevent.sleep(0)
+        if len(message) > 0:
+            data = json.loads(message)
+            self._connection.received.fire(**data)
+        gevent.sleep()
 
     def _get_url(self, action, **kwargs):
         args = kwargs.copy()
