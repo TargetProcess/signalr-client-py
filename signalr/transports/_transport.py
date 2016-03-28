@@ -20,8 +20,7 @@ class Transport:
         pass
 
     def negotiate(self):
-        url = self.__get_base_url(self._connection.url,
-                                  self._connection,
+        url = self.__get_base_url(self._connection,
                                   'negotiate',
                                   connectionData=self._connection.data)
         negotiate = self._session.get(url)
@@ -57,20 +56,15 @@ class Transport:
         args['connectionToken'] = self._connection.token
         args['connectionData'] = self._connection.data
 
-        url = self._get_transport_specific_url(self._connection.url)
-
-        return self.__get_base_url(url, self._connection, action, **args)
-
-    def _get_transport_specific_url(self, url):
-        return url
+        return self.__get_base_url(self._connection, action, **args)
 
     @staticmethod
-    def __get_base_url(url, connection, action, **kwargs):
+    def __get_base_url(connection, action, **kwargs):
         args = kwargs.copy()
         args.update(connection.qs)
         args['clientProtocol'] = connection.protocol_version
         query = '&'.join(['{key}={value}'.format(key=key, value=quote_plus(args[key])) for key in args])
 
-        return '{url}/{action}?{query}'.format(url=url,
+        return '{url}/{action}?{query}'.format(url=connection.url,
                                                action=action,
                                                query=query)
