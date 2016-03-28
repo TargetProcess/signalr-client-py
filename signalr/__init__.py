@@ -1,6 +1,7 @@
 from gevent import monkey
 
 monkey.patch_socket()
+monkey.patch_ssl()
 
 from ._connection import Connection
 
