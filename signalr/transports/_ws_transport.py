@@ -21,7 +21,8 @@ class WebSocketsTransport(Transport):
     def _get_name(self):
         return 'webSockets'
 
-    def _get_transport_specific_url(self, url):
+    @staticmethod
+    def __get_ws_url_from(url):
         parsed = urlparse(url)
         scheme = 'wss' if parsed.scheme == 'https' else 'ws'
         url_data = (scheme, parsed.netloc, parsed.path, parsed.params, parsed.query, parsed.fragment)
@@ -29,10 +30,13 @@ class WebSocketsTransport(Transport):
         return urlunparse(url_data)
 
     def start(self):
-        self.ws = create_connection(self._get_url('connect'),
+        ws_url = self.__get_ws_url_from(self._get_url('connect'))
+
+        self.ws = create_connection(ws_url,
                                     header=self.__get_headers(),
                                     cookie=self.__get_cookie_str(),
                                     enable_multithread=True)
+        self._session.get(self._get_url('start'))
 
         def _receive():
             for notification in self.ws:
@@ -65,6 +69,6 @@ class WebSocketsTransport(Transport):
 
     def __get_cookie_str(self):
         return '; '.join([
-            '%s=%s' % (name, value)
-            for name, value in self._session.cookies.items()
-        ])
+                             '%s=%s' % (name, value)
+                             for name, value in self._session.cookies.items()
+                             ])

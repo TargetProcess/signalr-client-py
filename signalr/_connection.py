@@ -11,6 +11,7 @@ class Connection:
     def __init__(self, url, session):
         self.url = url
         self.__hubs = {}
+        self.qs = {}
         self.__send_counter = -1
         self.token = None
         self.data = None
@@ -50,7 +51,7 @@ class Connection:
 
         def wrapped_listener():
             listener()
-            gevent.sleep(0)
+            gevent.sleep()
 
         self.__greenlet = gevent.spawn(wrapped_listener)
         self.started = True
